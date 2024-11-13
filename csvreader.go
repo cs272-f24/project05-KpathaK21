@@ -33,31 +33,13 @@ type Course struct {
     College                   string `csv:"College"`
 }
 
-// func ReadCSV(file io.Reader) ([]Course, error) {
-//     // Set up gocsv to use a custom CSV reader with LazyQuotes enabled
-//     gocsv.SetCSVReader(func(in io.Reader) gocsv.CSVReader {
-//         reader := csv.NewReader(in)
-//         reader.Comma = '\t'          // Set to tab-delimited
-//         reader.LazyQuotes = true     // Enable lazy quotes to handle unescaped quotes
-//         reader.FieldsPerRecord = -1  // Allow variable field counts if needed
-//         return reader
-//     })
-// 
-//     var courses []Course
-//     if err := gocsv.Unmarshal(file, &courses); err != nil {
-//         log.Printf("Failed to unmarshal CSV file: %v", err)
-//         return nil, err
-//     }
-// 
-//     log.Printf("Successfully read %d records from CSV.", len(courses))
-//     return courses, nil
-// }
- 
 func ReadCSV(file io.Reader) ([]Course, error) {
+    // Set up gocsv to use a custom CSV reader with LazyQuotes enabled
     gocsv.SetCSVReader(func(in io.Reader) gocsv.CSVReader {
         reader := csv.NewReader(in)
-        reader.Comma = ',' // Ensure tab delimiter
-        reader.LazyQuotes = true
+        reader.Comma = '\t'          // Set to tab-delimited
+        reader.LazyQuotes = true     // Enable lazy quotes to handle unescaped quotes
+        reader.FieldsPerRecord = -1  // Allow variable field counts if needed
         return reader
     })
 

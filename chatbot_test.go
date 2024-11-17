@@ -35,20 +35,17 @@ func RealChatBot() *ChatBot {
 	return NewChatBot(llmClient, metadataExtractor, chromaCtx, chromaClient, collection)
 }
 
-// TestPHIL tests the ChatBot response for philosophy courses
-func TestPHIL(t *testing.T) {
-	chatbot := RealChatBot()
-	question := "Which philosophy courses are offered this semester?"
-	answer, err := chatbot.AnswerQuestion(question)
-	fmt.Printf("Answer for question '%s':\n%s\n", question, answer)
-	if err != nil || !strings.Contains(answer, "Great Philosophical Questions") {
-		t.Errorf("Expected answer to mention 'Great Philosophical Questions', got: %v", answer)
-	}
+func TestCanonicalName(t *testing.T) {
+    instructors := InitializeInstructors()
+    name := findCanonicalName("Phil Peterson", instructors)
+    if name != "Philip Peterson" {
+        t.Errorf("Expected 'Philip Peterson', got '%s'", name)
+    }
 }
 
 func TestPhil(t *testing.T) {
 	chatbot := RealChatBot()
-	question := "What courses is Phil Peterson teaching in Fall 2024?"
+	question := "What CS classes is Phil Peterson teaching?"
 
 	// Expected instructor to appear in the answer
 	expectedInstructor := "Philip Peterson"
@@ -63,6 +60,17 @@ func TestPhil(t *testing.T) {
 	// Verify the answer contains the expected instructor name
 	if !strings.Contains(answer, expectedInstructor) {
 		t.Errorf("Expected answer to contain instructor '%s', got:\n%v", expectedInstructor, answer)
+	}
+}
+
+// TestPHIL tests the ChatBot response for philosophy courses
+func TestPHIL(t *testing.T) {
+	chatbot := RealChatBot()
+	question := "Which philosophy courses are offered this semester?"
+	answer, err := chatbot.AnswerQuestion(question)
+	fmt.Printf("Answer for question '%s':\n%s\n", question, answer)
+	if err != nil || !strings.Contains(answer, "Great Philosophical Questions") {
+		t.Errorf("Expected answer to mention 'Great Philosophical Questions', got: %v", answer)
 	}
 }
 

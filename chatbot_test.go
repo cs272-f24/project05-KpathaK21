@@ -10,30 +10,38 @@ import (
 )
 
 func RealChatBot() *ChatBot {
-	apiKey := os.Getenv("OPENAI_PROJECT_KEY")
-	if apiKey == "" {
-		log.Fatal("API key is missing. Please set OPENAI_PROJECT_KEY environment variable.")
-	}
-	llmClient := NewLLMClient(apiKey)
+    apiKey := os.Getenv("OPENAI_PROJECT_KEY")
+    if apiKey == "" {
+        log.Fatal("API key is missing. Please set OPENAI_PROJECT_KEY environment variable.")
+    }
 
-	csvFilePath := "Fall 2024 Class Schedule 08082024.csv"
-	csvFile, err := os.Open(csvFilePath)
-	if err != nil {
-		log.Fatalf("Failed to open CSV file: %v", err)
-	}
-	defer csvFile.Close()
+    llmClient := NewLLMClient(apiKey)
 
-	courses, err := ReadCSV(csvFile)
-	if err != nil {
-		log.Fatalf("Failed to read CSV file: %v", err)
-	}
+    // Open and parse the CSV file
+    csvFilePath := "Fall 2024 Class Schedule 08082024.csv"
+    csvFile, err := os.Open(csvFilePath)
+    if err != nil {
+        log.Fatalf("Failed to open CSV file: %v", err)
+    }
+    defer csvFile.Close()
 
-	fmt.Printf("Loaded %d courses from CSV:\n", len(courses))
-	metadataExtractor := &MetadataExtractor{courses: courses}
+    courses, err := ReadCSV(csvFile)
+    if err != nil {
+        log.Fatalf("Failed to read CSV file: %v", err)
+    }
+    fmt.Printf("Loaded %d courses from CSV.\n", len(courses))
 
-	chromaCtx, chromaClient, collection := Add(courses)
-	return NewChatBot(llmClient, metadataExtractor, chromaCtx, chromaClient, collection)
+    // Initialize MetadataExtractor
+    metadataExtractor := &MetadataExtractor{courses: courses}
+
+    // Add courses and instructors to ChromaDB
+    chromaCtx, chromaClient, courseCollection, instructorCollection := Add(metadataExtractor.courses)
+
+    // Return the chatbot
+    return NewChatBot(llmClient, metadataExtractor, chromaCtx, chromaClient, courseCollection, instructorCollection)
 }
+
+
 
 func TestCanonicalName(t *testing.T) {
     instructors := InitializeInstructors()
@@ -62,6 +70,7 @@ func TestPhil(t *testing.T) {
 		t.Errorf("Expected answer to contain instructor '%s', got:\n%v", expectedInstructor, answer)
 	}
 }
+
 
 // TestPHIL tests the ChatBot response for philosophy courses
 func TestPHIL(t *testing.T) {

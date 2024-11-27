@@ -10,45 +10,50 @@ import (
 )
 
 func RealChatBot() *ChatBot {
-	apiKey := os.Getenv("OPENAI_PROJECT_KEY")
-	if apiKey == "" {
-		log.Fatal("API key is missing. Please set OPENAI_PROJECT_KEY environment variable.")
-	}
-	llmClient := NewLLMClient(apiKey)
+    apiKey := os.Getenv("OPENAI_PROJECT_KEY")
+    if apiKey == "" {
+        log.Fatal("API key is missing. Please set OPENAI_PROJECT_KEY environment variable.")
+    }
 
-	csvFilePath := "Fall 2024 Class Schedule 08082024.csv"
-	csvFile, err := os.Open(csvFilePath)
-	if err != nil {
-		log.Fatalf("Failed to open CSV file: %v", err)
-	}
-	defer csvFile.Close()
+    llmClient := NewLLMClient(apiKey)
 
-	courses, err := ReadCSV(csvFile)
-	if err != nil {
-		log.Fatalf("Failed to read CSV file: %v", err)
-	}
+    // Open and parse the CSV file
+    csvFilePath := "Fall 2024 Class Schedule 08082024.csv"
+    csvFile, err := os.Open(csvFilePath)
+    if err != nil {
+        log.Fatalf("Failed to open CSV file: %v", err)
+    }
+    defer csvFile.Close()
 
-	fmt.Printf("Loaded %d courses from CSV:\n", len(courses))
-	metadataExtractor := &MetadataExtractor{courses: courses}
+    courses, err := ReadCSV(csvFile)
+    if err != nil {
+        log.Fatalf("Failed to read CSV file: %v", err)
+    }
+    fmt.Printf("Loaded %d courses from CSV.\n", len(courses))
 
-	chromaCtx, chromaClient, collection := Add(courses)
-	return NewChatBot(llmClient, metadataExtractor, chromaCtx, chromaClient, collection)
+    // Initialize MetadataExtractor
+    metadataExtractor := &MetadataExtractor{courses: courses}
+
+    // Add courses and instructors to ChromaDB
+    chromaCtx, chromaClient, courseCollection, instructorCollection := Add(metadataExtractor.courses)
+
+    // Return the chatbot
+    return NewChatBot(llmClient, metadataExtractor, chromaCtx, chromaClient, courseCollection, instructorCollection)
 }
 
-// TestPHIL tests the ChatBot response for philosophy courses
-func TestPHIL(t *testing.T) {
-	chatbot := RealChatBot()
-	question := "Which philosophy courses are offered this semester?"
-	answer, err := chatbot.AnswerQuestion(question)
-	fmt.Printf("Answer for question '%s':\n%s\n", question, answer)
-	if err != nil || !strings.Contains(answer, "Great Philosophical Questions") {
-		t.Errorf("Expected answer to mention 'Great Philosophical Questions', got: %v", answer)
-	}
+
+
+func TestCanonicalName(t *testing.T) {
+    instructors := InitializeInstructors()
+    name := findCanonicalName("Phil Peterson", instructors)
+    if name != "Philip Peterson" {
+        t.Errorf("Expected 'Philip Peterson', got '%s'", name)
+    }
 }
 
 func TestPhil(t *testing.T) {
 	chatbot := RealChatBot()
-	question := "What courses is Phil Peterson teaching in Fall 2024?"
+	question := "What CS classes is Phil Peterson teaching?"
 
 	// Expected instructor to appear in the answer
 	expectedInstructor := "Philip Peterson"
@@ -63,6 +68,18 @@ func TestPhil(t *testing.T) {
 	// Verify the answer contains the expected instructor name
 	if !strings.Contains(answer, expectedInstructor) {
 		t.Errorf("Expected answer to contain instructor '%s', got:\n%v", expectedInstructor, answer)
+	}
+}
+
+
+// TestPHIL tests the ChatBot response for philosophy courses
+func TestPHIL(t *testing.T) {
+	chatbot := RealChatBot()
+	question := "Which philosophy courses are offered this semester?"
+	answer, err := chatbot.AnswerQuestion(question)
+	fmt.Printf("Answer for question '%s':\n%s\n", question, answer)
+	if err != nil || !strings.Contains(answer, "Great Philosophical Questions") {
+		t.Errorf("Expected answer to mention 'Great Philosophical Questions', got: %v", answer)
 	}
 }
 

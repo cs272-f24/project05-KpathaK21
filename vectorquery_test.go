@@ -59,46 +59,42 @@ var testCourses = []Course{
 
 // TestAdd verifies that courses are added to the ChromaDB collection without errors
 func TestAdd(t *testing.T) {
-
     // Check if the required environment variable is set
     if os.Getenv("OPENAI_PROJECT_KEY") == "" {
         t.Fatalf("Environment variable OPENAI_PROJECT_KEY is not set")
     }
 
     // Call Add function with test courses to add them to the collection
-    ctx, client, collection := Add(testCourses)
+    ctx, client, courseCollection, instructorCollection := Add(testCourses)
 
     // Verify that none of the returned values are nil
-    if ctx == nil || client == nil || collection == nil {
-        t.Fatalf("Add function returned nil for context, client, or collection")
+    if ctx == nil || client == nil || courseCollection == nil || instructorCollection == nil {
+        t.Fatalf("Add function returned nil for context, client, or collections")
     }
-    
-    t.Log("Courses successfully added to collection")  // Log successful addition of courses
+
+    t.Log("Courses and instructors successfully added to collections") // Log successful addition
 }
+
 
 // TestQuery verifies that querying by course title returns expected results
 func TestQuery(t *testing.T) {
-
     // Ensure the environment variable for API key is set
     if os.Getenv("OPENAI_PROJECT_KEY") == "" {
         t.Fatalf("Environment variable OPENAI_PROJECT_KEY is not set")
     }
 
-    // Initialize client and collection with test data
-    ctx, client, collection := Add(testCourses)
+    // Initialize client and collections with test data
+    ctx, client, courseCollection, _ := Add(testCourses) // Ignore instructorCollection for this test
 
     // Define the course title to search for
-    queryTitle := "Survey/Western Art History I"
-    searchTerm := "Title Short Desc: " + queryTitle  // Full term to search within the results
-    results := Query(ctx, client, collection, queryTitle)
+    queryTitle := "Black Activists & Visionaries"
+    results := Query(ctx, client, courseCollection, queryTitle)
 
-    // Flag to check if the exact title is found in the results
+    // Check if the results contain the expected course title
     found := false
-
-    // Iterate over results to find the exact title within each document
     for _, doc := range results {
         for _, field := range doc {
-            if strings.Contains(field, searchTerm) {  // Check if field contains the search term
+            if strings.Contains(field, queryTitle) {
                 found = true
                 break
             }
@@ -108,10 +104,9 @@ func TestQuery(t *testing.T) {
         }
     }
 
-    // Assert the presence of the title in the results
     if !found {
         t.Errorf("Expected query result to contain title '%s', but it was not found", queryTitle)
     } else {
-        t.Logf("Query returned result(s) for title '%s'", queryTitle)  // Log success if title is found
+        t.Logf("Query returned result(s) for title '%s'", queryTitle) // Log success
     }
 }

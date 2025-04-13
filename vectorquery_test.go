@@ -60,8 +60,8 @@ var testCourses = []Course{
 // TestAdd verifies that courses are added to the ChromaDB collection without errors
 func TestAdd(t *testing.T) {
     // Check if the required environment variable is set
-    if os.Getenv("OPENAI_PROJECT_KEY") == "" {
-        t.Fatalf("Environment variable OPENAI_PROJECT_KEY is not set")
+    if os.Getenv("OPENAI_API_KEY") == "" {
+        t.Fatalf("Environment variable OPENAI_API_KEY is not set")
     }
 
     // Call Add function with test courses to add them to the collection
@@ -79,8 +79,8 @@ func TestAdd(t *testing.T) {
 // TestQuery verifies that querying by course title returns expected results
 func TestQuery(t *testing.T) {
     // Ensure the environment variable for API key is set
-    if os.Getenv("OPENAI_PROJECT_KEY") == "" {
-        t.Fatalf("Environment variable OPENAI_PROJECT_KEY is not set")
+    if os.Getenv("OPENAI_API_KEY") == "" {
+        t.Fatalf("Environment variable OPENAI_API_KEY is not set")
     }
 
     // Initialize client and collections with test data

@@ -10,9 +10,9 @@ import (
 )
 
 func RealChatBot() *ChatBot {
-    apiKey := os.Getenv("OPENAI_PROJECT_KEY")
+    apiKey := os.Getenv("OPENAI_API_KEY")
     if apiKey == "" {
-        log.Fatal("API key is missing. Please set OPENAI_PROJECT_KEY environment variable.")
+        log.Fatal("API key is missing. Please set OPENAI_API_KEY environment variable.")
     }
 
     llmClient := NewLLMClient(apiKey)

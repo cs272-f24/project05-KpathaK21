@@ -4,6 +4,7 @@ import (
     "fmt"
     "os"
     "bufio"
+    "strings"
 )
 
 // MetadataExtractor loads course data and extracts metadata like instructors and departments.
@@ -14,6 +15,11 @@ type MetadataExtractor struct {
     header 		string
 }
 
+// Instructor represents an instructor with a canonical name and aliases
+type Instructor struct {
+    CanonicalName string
+    Aliases       []string
+}
 
 // NewMetadataExtractor reads course data and the header from the CSV file if needed.
 func NewMetadataExtractor(csvFilePath string, client *LLMClient) (*MetadataExtractor, error) {
@@ -48,7 +54,32 @@ func NewMetadataExtractor(csvFilePath string, client *LLMClient) (*MetadataExtra
     }, nil
 }
 
+// InitializeInstructors creates a list of instructors with canonical names
+func InitializeInstructors() []Instructor {
+    return []Instructor{
+        {CanonicalName: "Philip Peterson", Aliases: []string{"Phil Peterson", "Philip Peterson"}},
+        {CanonicalName: "Philip Choong", Aliases: []string{"Phil Choong", "Philip Choong"}},
+        {CanonicalName: "Gregory Benson", Aliases: []string{"Greg Benson", "Gregory Benson"}},
+    }
+}
 
+func findCanonicalName(inputName string, instructors []Instructor) string {
+    inputName = strings.TrimSpace(inputName) // Remove leading and trailing whitespace
+    if inputName == "" {
+        return inputName // Return immediately if the input is empty
+    }
+
+    for _, instructor := range instructors {
+        for _, alias := range instructor.Aliases {
+            if strings.EqualFold(inputName, alias) {
+                fmt.Printf("Substituting alias '%s' with canonical name '%s'\n", inputName, instructor.CanonicalName)
+                return instructor.CanonicalName
+            }
+        }
+    }
+    fmt.Printf("No canonical substitution found for '%s'. Using original name.\n", inputName)
+    return inputName // Return the original name if no match is found
+}
 
 // uniqueInstructors creates a list of unique instructor canonical names from the courses.
 func uniqueInstructors(courses []Course) []string {

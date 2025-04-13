@@ -14,26 +14,13 @@ type LLMClient struct {
     client *openai.Client // The underlying OpenAI client instance used to interact with the API.
 }
 
-// NewLLMClient initializes a new LLMClient with an API key.
-// The API key is required to authenticate requests to the OpenAI API.
-// Params:
-// - apiKey: The OpenAI API key as a string.
-// Returns:
-// - An initialized LLMClient instance.
+
 func NewLLMClient(apiKey string) *LLMClient {
     client := openai.NewClient(apiKey) // Create a new OpenAI client instance using the provided API key.
     return &LLMClient{client: client} // Return an LLMClient with the created OpenAI client.
 }
 
-// ChatCompletion takes a question, replaces aliases with canonical names, and returns the LLM's response.
-// This function processes the question by replacing any recognized aliases with their canonical names
-// to ensure clarity for the LLM. It then sends the processed question and system message to the chat API.
-// Params:
-// - question: The user's query as a string.
-// - systemMessage: A system message to set context for the chat completion.
-// Returns:
-// - The LLM's response as a string.
-// - An error if the API call fails or another issue occurs.
+
 func (llm *LLMClient) ChatCompletion(question, systemMessage string) (string, error) {
     instructors := InitializeInstructors() // Initialize the list of instructors with aliases and canonical names.
     

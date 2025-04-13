@@ -59,6 +59,7 @@ func InitializeInstructors() []Instructor {
     return []Instructor{
         {CanonicalName: "Philip Peterson", Aliases: []string{"Phil Peterson", "Philip Peterson"}},
         {CanonicalName: "Philip Choong", Aliases: []string{"Phil Choong", "Philip Choong"}},
+        {CanonicalName: "Gregory Benson", Aliases: []string{"Greg Benson", "Gregory Benson"}},
     }
 }
 

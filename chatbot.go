@@ -116,4 +116,3 @@ func (bot *ChatBot) AnswerQuestion(question string) (string, error) {
     }
     return response, nil
 }
-

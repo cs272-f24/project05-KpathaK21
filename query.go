@@ -18,7 +18,7 @@ import(
 
 // Add adds a list of Course objects to the ChromaDB collection
 func Add(courses []Course) (context.Context, *chroma.Client, *chroma.Collection, *chroma.Collection) {
-    openaikey := os.Getenv("OPENAI_PROJECT_KEY")
+    openaikey := os.Getenv("OPENAI_API_KEY")
     if openaikey == "" {
         log.Fatalf("OPENAI_PROJECT_KEY not set in environment variables")
     }
